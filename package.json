@@ -1,0 +1,12 @@
+{
+  "name": "contactslist",
+  "version": "1.0.0",
+  "description": "Contact list as simple project but full of features and skills",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sajad",
+  "license": "ISC"
+}

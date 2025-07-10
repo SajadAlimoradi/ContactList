@@ -4,10 +4,33 @@ import fs from 'fs/promises'
 import { json } from 'stream/consumers'
 
 
-const CONTACTS_LIST_FILE_PATH =     './data/contacts-list.json'
+import {loadContacts, CONTACTS_LIST_FILE_PATH, formatContactList} from './services.js'
 
 const rl = readline.createInterface({input, output})
 const contactList = []
+
+
+
+async function deleteContact(){
+
+    if (contactList.length < 1){
+        console.error('There is no contact on the list');
+        return
+    }
+
+    showContactList()
+
+    const contactId = await rl.question('ID: ');
+    const contactIndex = contactList.findIndex(({id}) => id === Number(contactId))
+
+    if (contactIndex < 0){
+        console.error("Invalid  ID");
+        return;
+    }
+
+    contactList.splice(contactIndex, 1)
+    saveContact()
+}
 
 
 
@@ -21,21 +44,11 @@ async function saveContact(){
 
 }
 
-
-async function loadContacts(){
-    try {
-        const contactListJSON = await fs.readFile(CONTACTS_LIST_FILE_PATH, 'utf-8');
-        contactList.push(
-            ...JSON.parse(contactListJSON)
-        );
-    } catch(error) {
-        throw error
-    }
-}
-
-
 async function help(){
-    console.log('n: Add new Contact \nl:show contact list \nq:quit')
+    // console.clear()
+    console.log('-------- Help --------')
+    console.log('n: Add new Contact \nl:show contact list \nq:quit \nd: delete')
+    console.log('----------------------')
     const action = await rl.question("Enter you'r action: ")
     console.log(action)
 
@@ -43,6 +56,8 @@ async function help(){
         await addNewContact();
     } else if (action === 'l'){
         showContactList();
+    } else if (action === 'd'){
+        await deleteContact();
     } else{
         quit();
         return
@@ -67,11 +82,10 @@ async function addNewContact(){
 
 
 function showContactList (){
-    const fromattedContactList = contactList
-            .map(({id, firstName, lastName})=> ` #${id} ${firstName} ${lastName}`)
-            .join('\n')
-    console.log('Contacts List: ')
+    const fromattedContactList = formatContactList(contactList)
+    console.log(' ------ Contacts List: ------')
     console.log(fromattedContactList)
+    console.log(' ------ Contacts List: ------')
 }
 
 
@@ -87,7 +101,9 @@ function quit(){
 
 
 async function main (){
-    await loadContacts();
+
+    const loadContact = await loadContacts();
+    contactList.push(...loadContact);
     help();
 }
 
